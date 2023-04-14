@@ -127,7 +127,9 @@ def produce_collection_schema(collection):
     mdata = {}
     mdata = metadata.write(mdata, (), 'table-key-properties', ['_id'])
     mdata = metadata.write(mdata, (), 'database-name', collection_db_name)
-    mdata = metadata.write(mdata, (), 'row-count', collection.estimated_document_count())
+
+    #
+    # mdata = metadata.write(mdata, (), 'row-count', collection.estimated_document_count())
     mdata = metadata.write(mdata, (), 'is-view', is_view)
 
     # write valid-replication-key metadata by finding fields that have indexes on them.
@@ -366,6 +368,7 @@ def main_impl():
                          "authSource": config['database'],
                          "ssl": use_ssl,
                          "replicaset": config.get('replica_set', None),
+                         "tlsCAFile": config.get('tlsCAFile'),
                          "readPreference": 'secondaryPreferred'}
 
     # NB: "ssl_cert_reqs" must ONLY be supplied if `SSL` is true.
