@@ -368,6 +368,7 @@ def main_impl():
                          "authSource": config['database'],
                          "ssl": use_ssl,
                          "replicaset": config.get('replica_set', None),
+                         "tlsCAFile": config.get('tlsCAFile'),
                          "readPreference": 'secondaryPreferred'}
 
     # NB: "ssl_cert_reqs" must ONLY be supplied if `SSL` is true.
