@@ -69,7 +69,7 @@ def get_roles(client, config):
     #     ]
     # }
     user_info = client[config['database']].command({'usersInfo': config['user']})
-
+   
     users = [u for u in user_info.get('users') if u.get('user') == config['user']]
     if len(users) != 1:
         LOGGER.warning('Could not find any users for %s', config['user'])
@@ -104,6 +104,7 @@ def get_roles(client, config):
     return roles
 
 def get_databases(client, config):
+    
     roles = get_roles(client, config)
     LOGGER.info('Roles: %s', roles)
 
@@ -166,7 +167,7 @@ def do_discover(client, config):
     for db_name in get_databases(client, config):
         # pylint: disable=invalid-name
         db = client[db_name]
-
+        
         collection_names = db.list_collection_names()
         for collection_name in [c for c in collection_names
                                 if not c.startswith("system.")]:
@@ -352,6 +353,38 @@ def do_sync(client, catalog, state):
 
     LOGGER.info(common.get_sync_summary(catalog))
 
+def build_mongodb_uri(connection_params):
+
+    
+    if connection_params['mongoUriType'] == "srv":
+        uri = "mongodb+srv://"
+    elif connection_params['mongoUriType'] == "normal":
+        uri = "mongodb://"
+    
+    if connection_params["username"] and connection_params["password"]:
+        uri += f"{connection_params['username']}:{connection_params['password']}@"
+    
+    uri += f"{connection_params['host']}"
+    if not connection_params['mongoUriType']:
+        uri += f":{connection_params['port']}"
+    
+    uri += "/"
+
+    if connection_params["authSource"]:
+        uri += f"?authSource={connection_params['authSource']}"
+
+    if connection_params["ssl"]:
+        uri += "&ssl=true"
+    
+    if connection_params["replicaset"]:
+        uri += f"&replicaSet={connection_params['replicaset']}"
+    
+    if connection_params["tlsCAFile"]:
+        uri += f"&tlsCAFile={connection_params['tlsCAFile']}"
+    
+    uri += "&readPreference=secondaryPreferred"
+    
+    return uri
 
 def main_impl():
     args = utils.parse_args(REQUIRED_CONFIG_KEYS)
@@ -369,13 +402,18 @@ def main_impl():
                          "ssl": use_ssl,
                          "replicaset": config.get('replica_set', None),
                          "tlsCAFile": config.get('tlsCAFile'),
-                         "readPreference": 'secondaryPreferred'}
+                         "readPreference": 'secondaryPreferred',
+                         "mongoUriType": config.get('mongo_uri_type'),
+                         }
 
+    
     # NB: "ssl_cert_reqs" must ONLY be supplied if `SSL` is true.
     if not verify_mode and use_ssl:
         connection_params["ssl_cert_reqs"] = ssl.CERT_NONE
 
-    client = pymongo.MongoClient(**connection_params)
+    uri = build_mongodb_uri(connection_params)
+    
+    client = pymongo.MongoClient(uri)
 
     LOGGER.info('Connected to MongoDB host: %s, version: %s',
                 config['host'],
