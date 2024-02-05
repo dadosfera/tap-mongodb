@@ -356,16 +356,17 @@ def do_sync(client, catalog, state):
 def build_mongodb_uri(connection_params):
 
     
-    if connection_params['mongoUriType'] == "srv":
+    if connection_params['mongoUriType'] == "cluster":
         uri = "mongodb+srv://"
-    elif connection_params['mongoUriType'] == "normal":
+    elif connection_params['mongoUriType'] == "single":
         uri = "mongodb://"
     
     if connection_params["username"] and connection_params["password"]:
         uri += f"{connection_params['username']}:{connection_params['password']}@"
     
     uri += f"{connection_params['host']}"
-    if not connection_params['mongoUriType']:
+    
+    if connection_params['mongoUriType'] == "single":
         uri += f":{connection_params['port']}"
     
     uri += "/"
@@ -382,7 +383,7 @@ def build_mongodb_uri(connection_params):
     if connection_params["tlsCAFile"]:
         uri += f"&tlsCAFile={connection_params['tlsCAFile']}"
     
-    uri += "&readPreference=secondaryPreferred"
+    uri += f"&readPreference={connection_params['readPreference']}"
     
     return uri
 
