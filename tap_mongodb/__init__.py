@@ -355,7 +355,6 @@ def do_sync(client, catalog, state):
 
 def build_mongodb_uri(connection_params):
 
-    
     if connection_params['mongoUriType'] == "cluster":
         uri = "mongodb+srv://"
     elif connection_params['mongoUriType'] == "single":
