@@ -368,21 +368,13 @@ def build_mongodb_uri(connection_params):
     if connection_params['mongoUriType'] == "single":
         uri += f":{connection_params['port']}"
     
-    uri += "/"
+    uri += "/?"
+    params_filters = ["authSource", "ssl", "replicaset", "tlsCAFile", "readPreference"]
+    dict_params = {key: value for key, value in connection_params.items() if key in params_filters}
 
-    if connection_params["authSource"]:
-        uri += f"?authSource={connection_params['authSource']}"
-
-    if connection_params["ssl"]:
-        uri += "&ssl=true"
-    
-    if connection_params["replicaset"]:
-        uri += f"&replicaSet={connection_params['replicaset']}"
-    
-    if connection_params["tlsCAFile"]:
-        uri += f"&tlsCAFile={connection_params['tlsCAFile']}"
-    
-    uri += f"&readPreference={connection_params['readPreference']}"
+    query_params_filtered = [f'{key}={value}' for key, value in dict_params.items() if value is not None]
+    query_string = '&'.join(query_params_filtered)
+    uri += query_string
     
     return uri
 
@@ -399,7 +391,7 @@ def main_impl():
                          "username": config.get('user', None),
                          "password": config.get('password', None),
                          "authSource": config['database'],
-                         "ssl": use_ssl,
+                         "ssl": str(use_ssl).lower(),
                          "replicaset": config.get('replica_set', None),
                          "tlsCAFile": config.get('tlsCAFile'),
                          "readPreference": 'secondaryPreferred',
