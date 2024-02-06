@@ -384,7 +384,7 @@ def main_impl():
 
     # Default SSL verify mode to true, give option to disable
     verify_mode = config.get('verify_mode', 'true') == 'true'
-    use_ssl = config.get('ssl') == 'true'
+    use_ssl = config.get('ssl')
 
     connection_params = {"host": config['host'],
                          "port": int(config['port']),
