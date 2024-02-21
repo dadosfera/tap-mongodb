@@ -355,12 +355,14 @@ def do_sync(client, catalog, state):
 
 def build_mongodb_uri(connection_params):
 
+    uri = ""
+
     if connection_params['mongoUriType'] == "cluster":
         uri = "mongodb+srv://"
     elif connection_params['mongoUriType'] == "single":
         uri = "mongodb://"
-    else: 
-        uri = "mongodb://"
+    
+    LOGGER.info(uri)
     
     if connection_params["username"] and connection_params["password"]:
         uri += f"{connection_params['username']}:{connection_params['password']}@"
