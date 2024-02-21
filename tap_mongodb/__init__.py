@@ -359,6 +359,8 @@ def build_mongodb_uri(connection_params):
         uri = "mongodb+srv://"
     elif connection_params['mongoUriType'] == "single":
         uri = "mongodb://"
+    else: 
+        uri = "mongodb://"
     
     if connection_params["username"] and connection_params["password"]:
         uri += f"{connection_params['username']}:{connection_params['password']}@"
