@@ -5,8 +5,9 @@ import ssl
 import sys
 import time
 import pymongo
+import datetime
 from bson import timestamp
-
+from bson.codec_options import DatetimeConversion
 import singer
 from singer import metadata, metrics, utils
 
@@ -14,7 +15,6 @@ import tap_mongodb.sync_strategies.common as common
 import tap_mongodb.sync_strategies.full_table as full_table
 import tap_mongodb.sync_strategies.oplog as oplog
 import tap_mongodb.sync_strategies.incremental as incremental
-
 
 LOGGER = singer.get_logger()
 
@@ -409,7 +409,7 @@ def main_impl():
 
     uri = build_mongodb_uri(connection_params)
     
-    client = pymongo.MongoClient(uri)
+    client = pymongo.MongoClient(uri, datetime_conversion=DatetimeConversion.DATETIME_CLAMP)
 
     LOGGER.info('Connected to MongoDB host: %s, version: %s',
                 config['host'],
